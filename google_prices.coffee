@@ -1,6 +1,9 @@
 page = require('webpage').create()
 system = require 'system'
 
+page.onConsoleMessage = (msg, line, source) ->
+    console.log('console> ' + msg)
+
 if system.args.length < 3
     console.log 'Usage: flight_prices.coffee date return-date'
     phantom.exit 1
@@ -17,20 +20,22 @@ else
             if status isnt 'success'
                 console.log 'ERROR'
             else
-                page.includeJs('http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+                page.includeJs('https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
                     () ->
-                        airline = page.evaluate( () ->
-                            return $('.GGJC4XKGBC').first()
+                        airlines = page.evaluate( () ->
+                            return $('.GGJC4XKGBC')
                                 .clone().children().remove().end()
                                 .text()
                         )
-                        price = page.evaluate(() ->
-                            return $('.GGJC4XKCEC').first().text()
+                        prices = page.evaluate(() ->
+                            result = []
+                            $('.GGJC4XKCEC').each(() ->
+                                result.push(this)
+                                console.log(this)
+                            )
+                            return result
                         )
-                        console.log(airline)
-                        console.log(price)
+                        console.log(airlines)
+                        console.log(prices)
                         phantom.exit()
                 )
-                
-
-# GGJC4XKIWB GGJC4XKAXB
