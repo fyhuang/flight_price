@@ -68,8 +68,6 @@ casper.then ->
         @evaluate(get_flights, 'table#faresReturn > tbody > tr')
     )
 
-    @page.render('results.png')
-
 casper.run ->
     dump({
         outbound: ob_flights,
