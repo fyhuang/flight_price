@@ -1,48 +1,55 @@
-#casper = require('casper').create({
-#    clientScripts: ['includes/jquery.min.js']
-#})
 casper = require('casper').create()
 dump = require('utils').dump
 moment = require 'includes/moment.min.js'
 
-#casper.on 'remote.message', (msg) ->
-#    console.log(msg)
-
-
 # Parsing CLI options
 casper.cli.drop 'cli'
 casper.cli.drop 'casper-path'
-if casper.cli.args.length < 2
-    casper.echo('Usage: southwest_prices.coffee date return-date')
+if casper.cli.args.length < 3
+    casper.echo('Usage: southwest_prices.coffee origin dest date')
     casper.exit 1
 
 
-origin = 'SFO'
-dest = 'DEN'
+origin = casper.cli.args[0]
+dest = casper.cli.args[1]
 
 in_date_fmt = 'YYYY-MM-DD'
 date_fmt = 'MM/DD/YYYY'
-there_date = moment(casper.cli.args[0], in_date_fmt).format(date_fmt)
-return_date = moment(casper.cli.args[1], in_date_fmt).format(date_fmt)
+trip_date = moment(casper.cli.args[2], in_date_fmt).format(date_fmt)
 
 
-ob_flights = []
-ib_flights = []
+flights = []
 
 
-casper.start 'http://www.southwest.com', ->
-    @fill "form#booking_widget_air_form", {
-            originAirport: origin,
-            destinationAirport: dest,
-            outboundDateString: there_date,
-            returnDateString: return_date,
+#casper.start 'http://www.southwest.com', ->
+#    @click "input#oneWay"
+#    @fill "form#booking_widget_air_form", {
+#            originAirport: origin,
+#            originAirport_displayed: origin,
+#            destinationAirport: dest,
+#            destinationAirport_displayed: dest,
+#            outboundDateString: trip_date,
+#            #returnDateString: trip_date,
+#
+#            returnAirport: 'oneWay',
+#        }, true
+#    
+#    @click 'input#booking_widget_content_row_btn_search'
 
-            returnAirport: 'RoundTrip',
-        }
-    
-    @click '#booking_widget_content_row_btn_search'
+casper.start()
 
-casper.then ->
+# http://www.southwest.com/flight/select-flight.html?displayOnly=&disc=pdc%3A1364080764.282000%3AzUZJT5qASOy1lpypPtcjQQ%40A696CE9A2040AB2FE130F4A50AB2F964938AB4FB&ss=0&int=HOMEQBOMAIR&companyName=&cid=
+
+#casper.open('http://www.southwest.com/flight/search-flight.html?int=HOMEQBOMAIR', {
+casper.open('http://www.southwest.com/flight/select-flight.html?displayOnly=&disc=pdc%3A1364080764.282000%3AzUZJT5qASOy1lpypPtcjQQ%40A696CE9A2040AB2FE130F4A50AB2F964938AB4FB&ss=0&int=HOMEQBOMAIR&companyName=&cid=', {
+    method: 'post',
+    data: {
+        'originAirport': origin,
+        'destinationAirport': dest,
+        'outboundDateString': trip_date,
+        'returnAirport': 'oneWay'
+    }
+}).then ->
     get_flights = (query) ->
         rows = $(query)
         results = []
@@ -59,19 +66,8 @@ casper.then ->
         )
         return results
 
-
-    ob_flights = ob_flights.concat(
-        @evaluate(get_flights, 'table#faresOutbound > tbody > tr')
-    )
-
-    ib_flights = ib_flights.concat(
-        @evaluate(get_flights, 'table#faresReturn > tbody > tr')
-    )
+    flights = @evaluate(get_flights, 'table#faresOutbound > tbody > tr')
 
 casper.run ->
-    dump({
-        outbound: ob_flights,
-        inbound: ib_flights
-    })
-
+    dump(flights)
     this.exit()
