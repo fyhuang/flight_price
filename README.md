@@ -27,7 +27,14 @@ Try not to add too many choices, as the number of searches will increase exponen
 python record_prices.py sftoboston.json
 ~~~
 
-The prices are saved to a file `db/prices.db`.
+The prices are saved to a file `db/prices.db`. Run the command in your crontab to check prices every day:
+
+~~~
+crontab -e
+
+# In editor
+@daily cd /home/username/flight_prices && python record_prices.py config.json
+~~~
 
 Querying Saved Prices
 =====================
