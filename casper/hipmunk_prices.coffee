@@ -1,4 +1,10 @@
-casper = require('casper').create()
+ignore_images = (requestData, request) ->
+    if ( (/http:\/\/.+?\.(css|png|gif|jpg)/gi).test(requestData['url']) )
+        request.abort()
+casper = require('casper').create({
+    onResourceRequested: ignore_images
+})
+#casper = require('casper').create()
 utils = require('utils')
 moment = require 'includes/moment.min.js'
 

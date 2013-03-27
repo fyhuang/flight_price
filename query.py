@@ -1,7 +1,10 @@
+import sys
 import shelve
 import collections
 from contextlib import closing
 from datetime import time, datetime, timedelta
+
+from flightprice import Trip
 
 def date_from_str(s):
     return datetime.strptime(s, '%Y-%m-%d').date()
@@ -29,24 +32,30 @@ def pick_ib_flight(in_flights, carrier):
     before_time = time(23,0)
     return pick_flight_bounds(in_flights, after_time, before_time)
 
+origin = sys.argv[1]
+
 print("Loading...")
 with closing(shelve.open('db/prices.db', 'r')) as db:
     # Compute # weeks in advance to buy tickets
-    advance_prices = collections.defaultdict(lambda: [])
+    advance_prices_ob = collections.defaultdict(lambda: [])
+    advance_prices_ib = collections.defaultdict(lambda: [])
 
-    for record_date, departures in db.items():
-        for ddate, v in departures.items():
-            ob_flights = v[0]
-            ib_flights = v[1]
+    # Pick an outbound flight
+    for record_date, trips in db.items():
+        for trip_str, flights in trips.items():
+            trip = Trip.from_str(trip_str)
+            weeks_before = (trip.date - date_from_str(record_date) + timedelta(6)).days // 7
 
-            obf = pick_ob_flight(ob_flights)
-            ibf = pick_ib_flight(ib_flights, obf.carrier)
-            total_price = obf.price + ibf.price
+            if trip.origin == origin:
+                obf = pick_ob_flight(flights)
+                advance_prices_ob[weeks_before].append(obf.price)
+            else:
+                ibf = pick_ib_flight(flights, None)
+                advance_prices_ib[weeks_before].append(ibf.price)
 
-            weeks_before = (date_from_str(ddate) - date_from_str(record_date) + timedelta(6)).days // 7
-            advance_prices[weeks_before].append(total_price)
 
-    advance_avg_price = [(wb, sum(lst) / len(lst)) for wb,lst in advance_prices.items()]
+for price_dict in (advance_prices_ob, advance_prices_ib):
+    advance_avg_price = [(wb, sum(lst) / len(lst)) for wb,lst in price_dict.items()]
     best_advance_price = min(advance_avg_price, key=lambda wp: wp[1])
 
     print("Optimal to buy:")

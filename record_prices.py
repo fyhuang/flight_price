@@ -8,41 +8,13 @@ from subprocess import check_output
 from datetime import date, timedelta
 from time import sleep
 from contextlib import closing
-from collections import namedtuple
 
+from flightprice import DAYS_OF_WEEK, Trip
 import parse
-
-days_of_week = {
-        'Mon': 0,
-        'Tue': 1,
-        'Wed': 2,
-        'Thu': 3,
-        'Friday': 4,
-        'Fri': 4,
-        'Sat': 5,
-        'Sun': 6,
-        }
-
-_Trip = namedtuple('Trip', ['origin', 'dest', 'date'])
-class Trip(_Trip):
-    def __repr__(self):
-        return '{}:{}:{}'.format(
-                self.origin,
-                self.dest,
-                self.date.strftime('%Y-%m-%d')
-                )
-
-    @classmethod
-    def from_str(cls, trip_as_string):
-        tokens = trip_as_string.split(':')
-        dt = datetime.datetime.strptime(tokens[2]).date()
-        t = cls(tokens[0], tokens[1], dt)
-        return t
-
 
 def next_day(week, day):
     TD = timedelta(1)
-    day_num = days_of_week[day]
+    day_num = DAYS_OF_WEEK[day]
     curr = week + TD
     while curr.weekday() != day_num:
         curr += TD
@@ -72,6 +44,26 @@ def get_trips(num_days, config):
     return trips
 
 def get_prices(trips, db_filename, config):
+    """
+    DB structure:
+
+    {
+        /* Date of search */
+        "2013-01-01": {
+            /* str(Trip) */
+            "SFO:BOS:2013-02-01": [
+                FlightInfo(...),
+                FlightInfo(...),
+                /* ... */
+            ]
+        },
+
+        "2013-01-02": {
+            /* ... */
+        }
+    }
+    """
+
     wait_time = int(config['wait']) if 'wait' in config else 10
     DATE_FMT = "%Y-%m-%d"
     with closing(shelve.open(db_filename)) as db:

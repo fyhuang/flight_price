@@ -1,4 +1,10 @@
-casper = require('casper').create()
+ignore_images = (requestData, request) ->
+    if ( (/http:\/\/.+?\.(css|png|gif|jpg)/gi).test(requestData['url']) )
+        request.abort()
+casper = require('casper').create({
+    onResourceRequested: ignore_images
+})
+#casper = require('casper').create()
 dump = require('utils').dump
 moment = require 'includes/moment.min.js'
 
@@ -21,35 +27,34 @@ trip_date = moment(casper.cli.args[2], in_date_fmt).format(date_fmt)
 flights = []
 
 
-#casper.start 'http://www.southwest.com', ->
-#    @click "input#oneWay"
-#    @fill "form#booking_widget_air_form", {
-#            originAirport: origin,
-#            originAirport_displayed: origin,
-#            destinationAirport: dest,
-#            destinationAirport_displayed: dest,
-#            outboundDateString: trip_date,
-#            #returnDateString: trip_date,
-#
-#            returnAirport: 'oneWay',
-#        }, true
-#    
-#    @click 'input#booking_widget_content_row_btn_search'
+casper.start 'http://www.southwest.com', ->
+    @click "input#oneWay"
+    @fill "form#booking_widget_air_form", {
+            originAirport: origin,
+            originAirport_displayed: origin,
+            destinationAirport: dest,
+            destinationAirport_displayed: dest,
+            outboundDateString: trip_date,
+            #returnDateString: trip_date,
 
-casper.start()
+            #returnAirport: 'oneWay',
+        }
+    
+    @click 'input#booking_widget_content_row_btn_search'
 
-# http://www.southwest.com/flight/select-flight.html?displayOnly=&disc=pdc%3A1364080764.282000%3AzUZJT5qASOy1lpypPtcjQQ%40A696CE9A2040AB2FE130F4A50AB2F964938AB4FB&ss=0&int=HOMEQBOMAIR&companyName=&cid=
+#casper.start()
 
 #casper.open('http://www.southwest.com/flight/search-flight.html?int=HOMEQBOMAIR', {
-casper.open('http://www.southwest.com/flight/select-flight.html?displayOnly=&disc=pdc%3A1364080764.282000%3AzUZJT5qASOy1lpypPtcjQQ%40A696CE9A2040AB2FE130F4A50AB2F964938AB4FB&ss=0&int=HOMEQBOMAIR&companyName=&cid=', {
-    method: 'post',
-    data: {
-        'originAirport': origin,
-        'destinationAirport': dest,
-        'outboundDateString': trip_date,
-        'returnAirport': 'oneWay'
-    }
-}).then ->
+#casper.open('http://www.southwest.com/flight/select-flight.html?displayOnly=&disc=pdc%3A1364080764.282000%3AzUZJT5qASOy1lpypPtcjQQ%40A696CE9A2040AB2FE130F4A50AB2F964938AB4FB&ss=0&int=HOMEQBOMAIR&companyName=&cid=', {
+#    method: 'post',
+#    data: {
+#        'originAirport': origin,
+#        'destinationAirport': dest,
+#        'outboundDateString': trip_date,
+#        'returnAirport': 'oneWay'
+#    }
+#}).then ->
+casper.then ->
     get_flights = (query) ->
         rows = $(query)
         results = []

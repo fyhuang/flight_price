@@ -1,8 +1,7 @@
 import json
-import collections
 from datetime import datetime
 
-FlightInfo = collections.namedtuple('FlightInfo', ['carrier', 'depart_time', 'arrive_time', 'price', 'num_stops', 'add_days'])
+from flightprice import FlightInfo
 
 
 def to_flight_info(tr, lst):
@@ -42,7 +41,7 @@ def hipmunk(text):
             dt = datetime.strptime(parts[2].strip(), '%I:%M%p').time()
             return (dt, parts[0].strip())
         else:
-            dt = datetime.strptime(tstr, '%I:%M%p')
+            dt = datetime.strptime(tstr, '%I:%M%p').time()
             return (dt, None)
 
     def tr(f):
