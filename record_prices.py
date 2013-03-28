@@ -4,6 +4,7 @@ import sys
 import math
 import json
 import shelve
+import os
 from subprocess import check_output
 from datetime import date, timedelta
 from time import sleep
@@ -111,6 +112,10 @@ def main(args=None):
         config = json.load(f)
 
     trips = get_trips(180, config)
+
+    if not os.path.exists('db'):
+        os.makedirs('db')
+
     get_prices(trips, 'db/prices.db', config)
 
 if __name__ == "__main__":
