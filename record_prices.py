@@ -5,12 +5,11 @@ import math
 import json
 import shelve
 import os
-from subprocess import check_output
 from datetime import date, timedelta
 from time import sleep
 from contextlib import closing
 
-from flightprice import DAYS_OF_WEEK, Trip, next_day
+from flightprice import DAYS_OF_WEEK, Trip, next_day, run_casper
 import parse
 
 def get_trips(num_days, config):
@@ -66,15 +65,15 @@ def get_prices(trips, db_filename, config):
             flights = []
 
             date_str = trip.date.strftime(DATE_FMT)
-            sw_json = check_output(['casperjs',
-                'casper/southwest_prices.coffee',
-                trip.origin, trip.dest, date_str])
+            sw_json = run_casper(config,
+                    ['casper/southwest_prices.coffee',
+                    trip.origin, trip.dest, date_str])
             flights += parse.southwest(sw_json.decode())
 
-            hm_json = check_output(['casperjs',
-                'casper/hipmunk_prices.coffee',
-                trip.origin, trip.dest, date_str])
-            flights += parse.hipmunk(hm_json.decode())
+            bing_json = run_casper(config,
+                    ['casper/bing_prices.coffee',
+                    trip.origin, trip.dest, date_str])
+            flights += parse.bing(bing_json.decode())
 
             if len(flights) == 0:
                 print("WARNING: no flights returned {}!".format(trip))

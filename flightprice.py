@@ -1,4 +1,7 @@
+from __future__ import print_function, unicode_literals, division
+
 import datetime
+from subprocess import check_output
 from collections import namedtuple
 
 DAYS_OF_WEEK = {
@@ -40,4 +43,13 @@ class Trip(_Trip):
         t = cls(tokens[0], tokens[1], dt)
         return t
 
+
+
+def run_casper(config, args):
+    cmd = 'casperjs'
+    if 'casperjs_cmd' in config:
+        cmd = config['casperjs_cmd']
+
+    output = check_output([cmd] + args)
+    return output
 

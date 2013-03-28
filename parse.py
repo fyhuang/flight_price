@@ -59,3 +59,21 @@ def hipmunk(text):
         return FlightInfo(f['name'], dt, at, pr, ns, add_days)
 
     return to_flight_info(tr, flights)
+
+
+def bing(text):
+    flights = json.loads(text)
+
+    def to_time(tstr):
+        return datetime.strptime(tstr + 'm', '%I:%M%p').time()
+
+    def tr(f):
+        # f = {"airline": "United", "arrive_time": "9:00a", "depart_time": "5:30a", "price": "$295", "stops": "0"}
+        dt = to_time(f['depart_time'])
+        at = to_time(f['arrive_time'])
+        pr = int(f['price'].strip('$'))
+        ns = int(f['stops'])
+
+        return FlightInfo(f['airline'], dt, at, pr, ns, 0)
+
+    return to_flight_info(tr, flights)

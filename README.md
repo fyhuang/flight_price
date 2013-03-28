@@ -3,7 +3,7 @@ flight\_prices
 
 Scrape flight prices from online sites and analyse them for patterns. Currently supports getting prices from:
 
-* Hipmunk
+* Bing Travel
 * Southwest
 
 Quick Start
@@ -54,6 +54,22 @@ python test_config.py sample_sfotoboston.json
 # Trip: SJC -> BOS (Fri); BOS -> SJC (Mon)
 # Trip: OAK -> BOS (Fri); BOS -> OAK (Sun)
 # Trip: OAK -> BOS (Fri); BOS -> OAK (Mon)
+~~~
+
+Notes for Windows Users
+=======================
+
+CasperJS provides some [special instructions](http://casperjs.org/installation.html#windows) for those running on Windows. You may have to set the `casperjs_cmd` configuration option (in your JSON config file) to point to `casperjs.bat`; for example:
+
+~~
+{
+    /* ... */
+    "days": [
+        /* ... */
+    ],
+
+    "casperjs_cmd": "C:\\casperjs\\batchbin\\casperjs.bat"
+}
 ~~~
 
 Querying Saved Prices
