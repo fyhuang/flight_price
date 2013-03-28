@@ -49,7 +49,7 @@ def next_day(week, day):
     return curr
 
 def get_trips(num_days, config):
-    num_weeks = math.ceil(num_days / 7)
+    num_weeks = int(math.ceil(num_days / 7))
     weeks = [date.today()]
     for i in range(num_weeks):
         weeks.append(weeks[-1] + timedelta(7))
