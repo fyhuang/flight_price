@@ -12,6 +12,15 @@ DAYS_OF_WEEK = {
         'Sun': 6,
         }
 
+def next_day(week, day):
+    TD = datetime.timedelta(1)
+    day_num = DAYS_OF_WEEK[day]
+    curr = week + TD
+    while curr.weekday() != day_num:
+        curr += TD
+    return curr
+
+
 
 FlightInfo = namedtuple('FlightInfo', ['carrier', 'depart_time', 'arrive_time', 'price', 'num_stops', 'add_days'])
 

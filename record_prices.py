@@ -9,16 +9,8 @@ from datetime import date, timedelta
 from time import sleep
 from contextlib import closing
 
-from flightprice import DAYS_OF_WEEK, Trip
+from flightprice import DAYS_OF_WEEK, Trip, next_day
 import parse
-
-def next_day(week, day):
-    TD = timedelta(1)
-    day_num = DAYS_OF_WEEK[day]
-    curr = week + TD
-    while curr.weekday() != day_num:
-        curr += TD
-    return curr
 
 def get_trips(num_days, config):
     num_weeks = math.ceil(num_days / 7)
@@ -30,16 +22,16 @@ def get_trips(num_days, config):
     for week in weeks:
         for o in config["origins"]:
             for d in config["destinations"]:
-                for day in config["outbound_days"]:
-                    dt = next_day(week, day)
-                    if (dt - date.today()).days < num_days:
-                        # Some airlines don't have prices past 180 days
-                        trips.append(Trip(o, d, dt))
+                for day_spec in config["days"]:
+                    day = day_spec[0]
+                    length = day_spec[1]
 
-                for day in config["inbound_days"]:
-                    dt = next_day(week, day)
-                    if (dt - date.today()).days < num_days:
-                        trips.append(Trip(d, o, dt))
+                    out_dt = next_day(week, day)
+                    in_dt = out_dt + timedelta(length)
+                    if (in_dt - date.today()).days < num_days:
+                        # Some airlines don't have prices past 180 days
+                        trips.append(Trip(o, d, out_dt))
+                        trips.append(Trip(d, o, in_dt))
 
     return trips
 

@@ -1,0 +1,9 @@
+{
+    "origins": ["SFO", "SJC", "OAK"],
+    "destinations": ["BOS"],
+
+    "days": [
+        ["Fri", 2],
+        ["Fri", 3]
+    ]
+}
