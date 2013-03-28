@@ -61,7 +61,7 @@ Notes for Windows Users
 
 CasperJS provides some [special instructions](http://casperjs.org/installation.html#windows) for those running on Windows. You may have to set the `casperjs_cmd` configuration option (in your JSON config file) to point to `casperjs.bat`; for example:
 
-~~
+~~~
 {
     /* ... */
     "days": [
